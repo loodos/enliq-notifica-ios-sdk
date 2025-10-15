@@ -102,6 +102,46 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 In this example, the appropriate environment is selected based on compile-time defined conditions such as `DEBUG`, `STAGING`, or others, and the SDK is initialized in that environment. Thus, different API keys or configurations can be used for different environments.
 
+#### 2.1.1 Initializing With Options The SDK
+
+You can configure the SDK initialization using predefined options in the `EIQNotificationOption` enum.  
+These options allow you to customize SDK behavior during initialization, such as automatically requesting notification permissions or enabling SSL pinning.
+
+**Available Options:**
+
+```swift
+public enum EIQNotificationOption {
+    case requestPermissionOnInit
+    case pinnedSSL
+}
+```
+
+- **`requestPermissionOnInit`** → Automatically requests push notification permissions from the user when the SDK initializes.  
+- **`pinnedSSL`** → Enables SSL pinning for enhanced network security during API communication.
+
+**Example Usage:**
+
+```swift
+import UIKit
+import EIQNotifica
+
+@main
+class AppDelegate: UIResponder, UIApplicationDelegate {
+
+    func application(_ application: UIApplication,
+                     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+
+        // Initialize SDK with options
+        EIQNotificaManager.shared.initialize(options: [.requestPermissionOnInit, .pinnedSSL])
+        return true
+    }
+}
+```
+
+In this example:  
+- The SDK will automatically request notification permissions on startup.  
+- SSL pinning will be activated, ensuring secure communication with the Enliq backend.
+
 #### 2.2 Setting the Log Level
 
 You can use the example below to set the runtime log level of the SDK. This allows you to control the detail level of logs produced by the SDK:
