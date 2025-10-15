@@ -30,8 +30,8 @@ let package = Package(
         ),
         .binaryTarget(
             name: "EIQNotifica",
-            url: "https://github.com/loodos/enliq-notifica-ios-sdk/releases/download/1.0.0/eiqnotifica.xcframework.zip",
-            checksum: "ef1539cd529f1444ad36ff5a25be1e6f5b4fae7559136de89e3126b86923ba47"
+            url: "https://github.com/loodos/enliq-notifica-ios-sdk/releases/download/v2.0.0/eiqnotifica.xcframework.zip",
+            checksum: "b3b9a2004d61cf6fb61d6ebb59689ec3170a8161ba2954ae0cfe4f603dd0f212"
         )
     ]
 )
