@@ -19,17 +19,17 @@ let package = Package(
         .binaryTarget(
             name: "EIQNotifica",
             url: "https://github.com/loodos/enliq-notifica-ios-sdk/releases/download/v3.5.0/EIQNotifica.xcframework.zip",
-            checksum: "c126961689ed31b314f547e9dfe351248588290f0a838d8c7c5b666ffe27c4bf"
+            checksum: "2dfa209be9ef744ccb8068c65f41272139da20f2a9fdbf5a2ebb9e42b5d45e00"
         ),
         .binaryTarget(
             name: "EIQNotificaNotificationService",
             url: "https://github.com/loodos/enliq-notifica-ios-sdk/releases/download/v3.5.0/EIQNotificaNotificationService.xcframework.zip",
-            checksum: "cced347ea8fee7551ac6c595aa32f4d93e13ac3c6a57d7d47574a1b245e95356"
+            checksum: "156d496c71c633b2b5019bd09ab446b55e6b57c0858cedd3a1113fdccb94efaa"
         ),
         .binaryTarget(
             name: "EIQNotificaNotificationContent",
             url: "https://github.com/loodos/enliq-notifica-ios-sdk/releases/download/v3.5.0/EIQNotificaNotificationContent.xcframework.zip",
-            checksum: "f285343adef63b58789368d6c3928358b6177a8061d90d65700332ad644f6c99"
+            checksum: "eafb511569ed8c6162402f40a200ad5bafd69d0e28f50924b12763040f292452"
         ),
     ]
 )
