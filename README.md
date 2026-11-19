@@ -1,441 +1,327 @@
 <p align="center">
-  <img src="https://i.ibb.co/zh0Lrz6J/test.png"/>
+  <img src="https://i.ibb.co/zh0Lrz6J/test.png" alt="Enliq" width="320"/>
 </p>
 
-## EIQNotifica iOS SDK
-[![Platform](https://img.shields.io/badge/platform-iOS-blue.svg?style=flat)](https://cocoapods.org/pods/EIQNotifica)
-[![Swift Package Manager compatible](https://img.shields.io/badge/Swift%20Package%20Manager-compatible-brightgreen.svg?style=flat)](https://github.com/apple/swift-package-manager)
-[![License](https://img.shields.io/badge/license-apache%202.0-blue.svg?style=flat)](https://cocoapods.org/pods/EIQNotifica)
+<h1 align="center">EIQNotifica iOS SDK</h1>
+
+<p align="center">
+  <a href="https://github.com/loodos/enliq-notifica-ios-sdk/releases/latest"><img src="https://img.shields.io/github/v/release/loodos/enliq-notifica-ios-sdk?label=release&sort=semver" alt="Latest release"/></a>
+  <img src="https://img.shields.io/badge/platform-iOS%2015.0%2B-blue.svg" alt="Platform iOS 15.0+"/>
+  <a href="https://swift.org/package-manager"><img src="https://img.shields.io/badge/SPM-compatible-brightgreen.svg" alt="Swift Package Manager compatible"/></a>
+  <img src="https://img.shields.io/badge/distribution-XCFramework-lightgrey.svg" alt="Binary XCFramework"/>
+</p>
+
+<p align="center">
+  Push notifications, rich media, inbox, channel subscriptions and commerce events<br/>
+  for iOS apps powered by the <a href="https://www.enliq.com">Enliq</a> customer engagement platform.
+</p>
+
+<p align="center">
+  <a href="https://developer.enliq.com"><b>Developer Docs</b></a> ·
+  <a href="https://github.com/loodos/enliq-notifica-ios-sdk/releases"><b>Releases</b></a> ·
+  <a href="#support"><b>Support</b></a>
+</p>
+
 ---
 
-[EIQNotifica](https://www.enliq.com) iOS SDK for mobile app engagement platform
+## Contents
 
-**EIQNotifica** is a powerful and flexible SDK for managing push and local notifications in your iOS applications. It simplifies notification delivery, channel management, user association, and provides a clean, extensible API for custom notification workflows. Designed for modern Swift, EIQNotifica enables you to quickly integrate robust notification features with minimal effort. See details at https://developer.enliq.com
-
-
-## Installation
-EIQNotifica iOS SDK is fully compatible with the latest stable version of Swift and integrates seamlessly with modern iOS applications.
+- [Requirements](#requirements)
+- [Libraries](#libraries)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Configuration](#configuration)
+- [Push Notifications](#push-notifications)
+- [Rich Notifications](#rich-notifications)
+- [Users](#users)
+- [Channels](#channels)
+- [Inbox](#inbox)
+- [Commerce Events](#commerce-events)
+- [Logging](#logging)
+- [Migrating to 3.x](#migrating-to-3x)
+- [Support](#support)
 
 ## Requirements
-- iOS 12.0+
-- Xcode 11.0+
-- Analytics is available through CocoaPods and Carthage.
 
-### CocoaPods
-// TODO: Feature
+| | Minimum |
+|---|---|
+| iOS | 15.0 |
+| Xcode | 16.0 |
+| Swift | 5.9 |
 
-### Swift Package Manager(SPM)
+The SDK is distributed as precompiled **binary XCFrameworks** built with library evolution, so it works with any newer Swift compiler. It has **no third-party dependencies** to resolve in your project.
 
-In Xcode, select File > Add Packages..
+## Libraries
 
-Enter the package URL for this repository https://github.com/loodos/eiqnotifica-ios.git.
+| Library | Add to target | Purpose |
+|---|---|---|
+| `EIQNotifica` | App | Core SDK: initialization, push handling, users, channels, inbox, events. |
+| `EIQNotificaNotificationService` | Notification Service Extension | Downloads and attaches images and videos for rich notifications. |
+| `EIQNotificaNotificationContent` | Notification Content Extension | Base for custom notification UI (Notification Content Extension). |
 
-### Carthage
-// TODO: Feature
+## Installation
 
-## Usage
+### Swift Package Manager
 
-Before starting to use the EIQNotifica SDK, you need to add the required plist file to your project and initialize the SDK.
+**Xcode:** `File` → `Add Package Dependencies…` → enter the URL below → choose **Up to Next Major Version**.
 
-#### 1. Add the `Enliq-Config.plist` File
+```
+https://github.com/loodos/enliq-notifica-ios-sdk
+```
 
-To ensure the SDK works properly, add the provided `Enliq-Config` file to your Xcode project. This file contains the keys and configurations necessary for your app to communicate with the Enliq platform.
+Add `EIQNotifica` to your app target, and the extension libraries to their extension targets if you use them.
 
-#### 2. Initializing the SDK
+**Package.swift:**
 
-In your AppDelegate file, the SDK should be initialized when the app launches. You can check the example below:
+```swift
+dependencies: [
+    .package(url: "https://github.com/loodos/enliq-notifica-ios-sdk.git", .upToNextMajor(from: "3.0.0"))
+],
+targets: [
+    .target(
+        name: "YourApp",
+        dependencies: [
+            .product(name: "EIQNotifica", package: "enliq-notifica-ios-sdk")
+        ]
+    )
+]
+```
+
+## Quick Start
+
+**1. Add `Enliq-Config.plist`** to your app target (and to your Notification Service Extension target, if any) with the values provided by Enliq. See [Configuration](#configuration).
+
+**2. Enable capabilities** on your app target: *Push Notifications*, *Background Modes → Remote notifications*, and *App Groups* if you use extensions.
+
+**3. Initialize the SDK** as early as possible:
 
 ```swift
 import UIKit
 import EIQNotifica
 
 @main
-class AppDelegate: UIResponder, UIApplicationDelegate {
+final class AppDelegate: UIResponder, UIApplicationDelegate {
 
-    func application(_ application: UIApplication,
-                     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Initialize EIQNotifica SDK
-        EIQNotificaManager.shared.initialize(options: [])
+    func application(
+        _ application: UIApplication,
+        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
+    ) -> Bool {
+        EIQNotificaManager.shared.initialize(options: [.requestPermissionOnInit])
+        EIQNotificaManager.shared.pushDelegate(self)
         return true
     }
 }
-```
 
-In the code above, the call `EIQNotificaManager.shared.initialize(options: [])` starts the SDK and prepares the notification infrastructure. Remember to manage push notification permissions in your app for the SDK to function correctly.
-
-#### 2.1 Environment-Based Initialization
-
-You can use the example below to initialize the SDK according to different environments. This allows applying different configurations for development, testing, and production environments:
-
-```swift
-import UIKit
-import EIQNotifica
-
-@main
-class AppDelegate: UIResponder, UIApplicationDelegate {
-
-    func application(_ application: UIApplication,
-                     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-         #if DEBUG
-        configureEIQNotifica(for: "Enliq-Config-Dev")
-        #elseif STAGING
-        configureEIQNotifica(for: "Enliq-Config-Stage")
-        #else
-        EIQNotificaManager.shared.initialize(options: [])
-        #endif
-        return true
-    }
-    
-    func configureEIQNotifica(for resource: String) {
-        if let file = Bundle.main.path(forResource: resource, ofType: "plist"),
-           let options = EIQNotificaEnvironment(contentsOfFile: file) {
-            EIQNotificaManager.shared.initialize(
-                environment: options,
-                options: []
-            )
-        } else {
-            EIQNotificaManager.shared.initialize(options: [])
-        }    
-    }
+extension AppDelegate: EIQMessageDelegate {
+    func eiqDeviceToken(_ messaging: EIQMessage, deviceToken: String?) {}
+    func eiqNotificationAction(actionIdentifier: String, actionURL: String?) {}
+    func eiqDidReciveSlientPush(payload: EIQPushPayload?) {}
 }
 ```
 
-In this example, the appropriate environment is selected based on compile-time defined conditions such as `DEBUG`, `STAGING`, or others, and the SDK is initialized in that environment. Thus, different API keys or configurations can be used for different environments.
+That's it. The SDK registers the device, handles the APNs token and tracks notification interactions automatically.
 
-#### 2.1.1 Initializing With Options The SDK
+## Configuration
 
-You can configure the SDK initialization using predefined options in the `EIQNotificationOption` enum.  
-These options allow you to customize SDK behavior during initialization, such as automatically requesting notification permissions or enabling SSL pinning.
+### `Enliq-Config.plist`
 
-**Available Options:**
+| Key | Required | Description |
+|---|---|---|
+| `NOTIFICA_APP_ID` | ✅ | Your application identifier, provided by Enliq. |
+| `APP_GROUP_ID` | ✅ with extensions | Shared App Group used to share data between the app and its extensions. |
+| `NOTIFICA_BASE_URL` | — | Custom API endpoint (e.g. staging). Defaults to production. |
+| `NOTIFICA_SSL_ENABLE` | — | `YES` to enable SSL pinning for SDK requests. |
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>NOTIFICA_APP_ID</key>
+    <string>YOUR_APP_ID</string>
+    <key>APP_GROUP_ID</key>
+    <string>group.com.yourcompany.yourapp</string>
+</dict>
+</plist>
+```
+
+### Initialization options
+
+| Option | Description |
+|---|---|
+| `.requestPermissionOnInit` | Asks the user for notification permission when the SDK initializes. |
+
+### Multiple environments
+
+Load a different configuration file per build configuration:
 
 ```swift
-public enum EIQNotificationOption {
-    case requestPermissionOnInit
-    case pinnedSSL
+func configureEnliq() {
+    #if DEBUG
+    let resource = "Enliq-Config-Dev"
+    #else
+    let resource = "Enliq-Config"
+    #endif
+
+    let environment = Bundle.main
+        .path(forResource: resource, ofType: "plist")
+        .flatMap(EIQNotificaEnvironment.init(contentsOfFile:))
+
+    EIQNotificaManager.shared.initialize(environment: environment, options: [])
 }
 ```
 
-- **`requestPermissionOnInit`** → Automatically requests push notification permissions from the user when the SDK initializes.  
-- **`pinnedSSL`** → Enables SSL pinning for enhanced network security during API communication.
+<details>
+<summary>Alternative: copy the right plist at build time with a Run Script phase</summary>
 
-**Example Usage:**
+Useful when extensions must read the same environment. Add the script below to your project and run it from a **Run Script** build phase placed **above "Copy Bundle Resources"** in the app target and in the Notification Service Extension target.
 
-```swift
-import UIKit
-import EIQNotifica
+```bash
+#!/bin/bash -l
+# ${PROJECT_DIR}/scripts/enliq.sh
+CONFIG_DIR="${PROJECT_DIR}/YourApp/Config"
 
-@main
-class AppDelegate: UIResponder, UIApplicationDelegate {
-
-    func application(_ application: UIApplication,
-                     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-
-        // Initialize SDK with options
-        EIQNotificaManager.shared.initialize(options: [.requestPermissionOnInit, .pinnedSSL])
-        return true
-    }
-}
+if [[ "${CONFIGURATION}" == *"Dev"* ]]; then
+  cp -v "${CONFIG_DIR}/Enliq-Config-Dev.plist" "${CONFIG_DIR}/Enliq-Config.plist"
+elif [[ "${CONFIGURATION}" == *"Beta"* ]]; then
+  cp -v "${CONFIG_DIR}/Enliq-Config-Beta.plist" "${CONFIG_DIR}/Enliq-Config.plist"
+else
+  cp -v "${CONFIG_DIR}/Enliq-Config-Store.plist" "${CONFIG_DIR}/Enliq-Config.plist"
+fi
 ```
 
-In this example:  
-- The SDK will automatically request notification permissions on startup.  
-- SSL pinning will be activated, ensuring secure communication with the Enliq backend.
+</details>
 
-#### 2.2 Setting the Log Level
+## Push Notifications
 
-You can use the example below to set the runtime log level of the SDK. This allows you to control the detail level of logs produced by the SDK:
-
-```swift
-EIQNotificaManager.shared.logLevel(logLevel: .info)
-```
-
-This code sets the log level to `info`, so informational messages and certain logs are printed to the console. This feature is useful during debugging and monitoring app behavior.
-
-##### 2.3 Requesting Push Notification Permissions
-
-You can request push notification permissions from the user with this call. Use the following code to ask for permissions::
+Request permission manually (if you don't use `.requestPermissionOnInit`):
 
 ```swift
 EIQNotificaManager.shared.requestPushNotificationAuthorization(for: [.alert, .badge, .sound])
 ```
 
-##### 2.4 Push Notifications and Delegate Usage
-Also, you can set a delegate to receive device tokens and message events from the SDK. The example below shows how to set the `pushDelegate` and implement the required protocol:
+`EIQMessageDelegate` callbacks:
 
+| Method | Called when |
+|---|---|
+| `eiqDeviceToken(_:deviceToken:)` | The APNs device token is received. |
+| `eiqNotificationAction(actionIdentifier:actionURL:)` | The user taps a notification or an action button. Use `actionURL` for deep links. |
+| `eiqDidReciveSlientPush(payload:)` | A silent push is received. |
 
-```swift
-EIQNotificaManager.shared.pushDelegate(self)
-
-extension AppDelegate: EIQMessageDelegate {
-    // 1️⃣ Device Token
-    func eiqDeviceToken(
-        _ messaging: EIQNotifica.EIQMessage,
-        deviceToken: String?
-    ) {}
-    
-    // 2️⃣ Notification Actions
-    func eiqNotificationAction(
-        actionIdentifier: String,
-        actionURL: String?
-    ) {
-        // Called when the user taps on a notification action button.
-        // - actionIdentifier: ID of the tapped action (e.g., "EIQ_ACTION")
-        // - actionURL: The URL associated with the button (deeplink or external link)
-        // Use this to navigate to a screen or open a link.
-    }
-}
-```
-
-
-This code sets the delegate to receive device tokens and message events from the SDK. Thus, push notification management and related events can be handled within the AppDelegate.
-
-#### 2.4.1 Handling Rich Notifications
-
-To enable rich notifications (displaying images or videos in notifications), you need to add a **Notification Service Extension** to your Xcode project and configure it to use the EIQNotifica SDK.
-
-**Steps to enable rich notifications:**
-
-1. **Create a Notification Service Extension:**
-   - In Xcode, select your project, then choose `File > New > Target...`.
-   - Select **Notification Service Extension** and click **Next**.
-   - Name the extension (e.g., `NotificaNotificationService`), then click **Finish**.
-   - When prompted, activate the new scheme.
-
-2. **Configure the Extension:**
-   - Open the generated `NotificationService.swift` file in your extension target.
-   - Import the EIQNotifica SDK.
-   - Change the class to subclass `EIQNotificaNotificationService` instead of `UNNotificationServiceExtension`.
-
-**Example `NotificationService.swift`:**
+If your app manages notification permission itself, keep the SDK in sync:
 
 ```swift
-import UserNotifications
-import EIQNotifica
-
-class NotificationService: EIQNotificaNotificationService {
-    // No need to override anything unless you want to customize behavior.
-}
+EIQNotificaManager.shared.updateStatus(pushEnabled: true)
 ```
 
-By using `EIQNotificaNotificationService` as the superclass, the SDK will automatically handle downloading and attaching images or videos to your notifications if the push payload includes a `media-url` key.
+## Rich Notifications
 
-**How to send media with your notifications:**
-
-- Include a `media-url` key in your push payload pointing to an image or video URL. The SDK will download and attach the media to the notification automatically.
-
-**Example payload with image:**
-```json
-{
-  "aps": {
-    "alert": {
-      "title": "EIQNotifica",
-      "body": "EIQNotifica picture test"
-    }
-  },
-  "media-url": "https://example.com/image.png"
-}
-```
-
-**Example payload with video:**
-```json
-{
-  "aps": {
-    "alert": {
-      "title": "EIQNotifica",
-      "body": "EIQNotifica video test"
-    }
-  },
-  "media-url": "https://example.com/video.mp4"
-}
-```
-
-With this setup, your users will receive rich notifications with images or videos attached, simply by including the `media-url` key in your push notification payload.
-
-#### 2.5 Assigning a User
-
-You can associate user information with the SDK using the `setUser(_ user: EIQNotificaUser)` method. This ensures notifications and user interactions are matched to the correct user.
+1. In Xcode, `File` → `New` → `Target…` → **Notification Service Extension**.
+2. Add the `EIQNotificaNotificationService` library to the extension target.
+3. Add `Enliq-Config.plist` and the same **App Group** to the extension target.
+4. Subclass `EIQNotificaNotificationService`:
 
 ```swift
-let user = EIQNotificaUser()
-user.externalId = "EXAMPLE_UNIQUE_ID"
-user.name = "John"
-user.surname = "Doe"
-user.email = "john.doe@example.com"
-user.phone = "5551234567"
-EIQNotificaManager.shared.setUser(user)
+import EIQNotificaNotificationService
+
+final class NotificationService: EIQNotificaNotificationService {}
 ```
 
-This code assigns the specified user information to the SDK and enables user-specific notification management.
+Images and videos sent from the Enliq panel are downloaded and attached automatically.
 
-#### 2.6 Assigning Custom Properties  
+## Users
 
-The SDK allows you to update user-specific parameters (custom properties) defined via the **Enliq Notifica Panel** from within the application.  
-This feature enables easy application of user-specific filtering, segment creation, or targeted notification scenarios.  
+```swift
+let user = EIQNotificaUser(
+    externalId: "USER_ID",
+    name: "Jane",
+    surname: "Doe",
+    email: "jane@example.com",
+    phone: "5551234567"
+)
+EIQNotificaManager.shared.setUser(user) { result in /* Result<Bool, Error> */ }
+```
 
-In the example below, custom parameters for the user matching the `externalId` value are updated:  
+Update custom properties defined in the Enliq panel:
 
 ```swift
 EIQNotificaManager.shared.setCustomProperties(
-    externalId: "EXAMPLE_UNIQUE_ID",
-    attributes: [
-        "customparam1": "Enliq Notifica"
-    ],
+    externalId: "USER_ID",
+    attributes: ["membership": "gold"],
     completion: nil
 )
 ```
 
-With this call:  
-- **`externalId`**: Uniquely identifies the user.  
-- **`attributes`**: Contains key-value pairs of custom properties defined in the panel.  
-- **`completion`**: (Optional) can be used to receive feedback when the operation completes.  
-
-Thus, custom properties defined on the panel can be updated from the application side, allowing more flexible notification scenarios based on user behavior and interactions.  
-
-#### 2.7 Fetching the Channel List  
-
-The SDK provides the following method to retrieve the list of channels associated with a user:  
+On sign-out, clear the local user session:
 
 ```swift
-EIQNotificaManager.shared.getChannels(
-    externalId: "EXAMPLE_UNIQUE_ID"
-) { result in
-    switch result {
-    case .success(let channels):
-        print("Channels associated with the user: \(channels)")
-    case .failure(let error):
-        print("Failed to fetch channel list: \(error)")
-    }
-}
+EIQNotificaManager.shared.logout()
 ```
 
-With this call:  
-- **`externalId`**: Identifies the user whose channel list will be fetched.  
-- **`completion`**: Returns the channel list (`[EIQChannels]`) or error information when the operation completes.  
-
-This allows easy querying of existing notification channels for the user.  
-
-#### 2.8 Channel Subscription Management  
-
-The SDK provides `subscribe` and `unsubscribe` methods to manage users' channel subscriptions.  
-With these methods, users can subscribe to or unsubscribe from specific channels.  
+## Channels
 
 ```swift
-// Start channel subscription
-EIQNotificaManager.shared.subscribe(
-    externalId: "EXAMPLE_UNIQUE_ID",
-    channelKey: "NEWS_CHANNEL"
-) { result in
-    switch result {
-    case .success(let success):
-        print("Channel subscription successful: \(success ?? false)")
-    case .failure(let error):
-        print("Subscription operation failed: \(error)")
-    }
+EIQNotificaManager.shared.getChannels(externalId: "USER_ID") { result in
+    // Result<[EIQChannels], Error>
 }
 
-// Unsubscribe from channel
-EIQNotificaManager.shared.unsubscribe(
-    externalId: "EXAMPLE_UNIQUE_ID",
-    channelKey: "NEWS_CHANNEL"
-) { result in
-    switch result {
-    case .success(let success):
-        print("Unsubscribed from channel: \(success ?? false)")
-    case .failure(let error):
-        print("Unsubscription operation failed: \(error)")
-    }
-}
+EIQNotificaManager.shared.subscribe(channelId: "CHANNEL_ID") { result in }
+EIQNotificaManager.shared.unsubscribe(channelId: "CHANNEL_ID") { result in }
 ```
 
-With these calls:  
-- **`externalId`**: Uniquely identifies the user.  
-- **`channelKey`**: The key of the channel to subscribe to or unsubscribe from.  
-- **`completion`**: Returns success (`Bool`) or error information when the operation completes.  
-
-###  
-
-### 2.9 Fetch Inbox  
-The EIQNotifica SDK provides methods to manage notifications delivered to users through the inbox. It can fetch messages based on their status (read, unread, deleted).
+## Inbox
 
 ```swift
-let filter = EIQInboxFilter(pageSize: 10, status: [.read, .unread, .deleted])
-EIQNotificaManager.shared.getInbox(filter: filter) { result in
-    switch result {
-    case .success(let response):
-        print("Inbox items: \(response)")
-    case .failure(let error):
-        print("Failed to fetch inbox: \(error)")
-    }
+EIQNotificaManager.shared.getInbox { items in
+    // [EIQInbox]
 }
+
+if let deliveryId = item.deliveryId {
+    EIQNotificaManager.shared.updateInboxStatus(deliveryId: deliveryId, status: .read) { result in }
+}
+
+EIQNotificaManager.shared.getCount { count in
+    // count.totalCount, count.unreadCount
+}
+
+EIQNotificaManager.shared.deleteAll { isDeleted in }
 ```
 
-With these calls:  
-- **`filter`**: Defines filtering options such as statuses (`read`, `unread`, `deleted`) and page size.  
-- **`completion`**: Returns an array of `EIQInbox` (`[EIQInbox]`) or error information when the operation completes.
+`EIQInboxStatus`: `.unread`, `.read`, `.deleted`.
 
-###
-
-#### 3.0 Update Inbox Status
-Updates the status of a specific inbox item. You can mark an item as read, unread, or deleted by providing its unique key.
-This operation returns the result through the completion handler.
+## Commerce Events
 
 ```swift
-EIQNotificaManager.shared.updateInboxStatus(
-    key: "INBOX_ITEM_KEY",
-    status: .read
-) { result in
-    switch result {
-    case .success(let success):
-        print("Status updated: \(success ?? false)")
-    case .failure(let error):
-        print("Failed to update inbox status: \(error)")
-    }
-}
+let items = [
+    EIQNotificaBasketItem(id: "SKU_001", name: "T-Shirt", quantity: 2, price: 99.95, totalAmount: 199.90)
+]
+
+// When the basket changes
+EIQNotificaManager.shared.addToBasketEvent(basketId: "BASKET_123", totalAmount: 199.90, products: items)
+
+// After a successful payment
+EIQNotificaManager.shared.purchaseEvent(basketId: "BASKET_123", totalAmount: 199.90, products: items)
 ```
 
-With these parameters:  
-- **`key`**: The unique identifier of the inbox item whose status will be updated.  
-- **`status`**: The new status to assign to the inbox item (e.g., `.read`, `.unread`, `.deleted`).  
-- **`completion`**: Provides the result of the operation, returning either a success flag (`Bool`) or error details once the process is complete.  
-###
-
-#### 3.1 Get Inbox Count  
-
-Retrieves the total number of inbox items for the user.  
-The response provides detailed counts, including total, unread, read, and deleted messages.  
+## Logging
 
 ```swift
-EIQNotificaManager.shared.getCount { result in
-    print("Total: \(count?.totalCount ?? 0)")
-    print("Unread: \(count?.unreadCount ?? 0)")
-    print("Read: \(count?.readCount ?? 0)")
-    print("Deleted: \(count?.deletedCount ?? 0)")
-}
+EIQNotificaManager.shared.logLevel(logLevel: .debug) // .error, .warning, .notice, .info, .debug, .none
 ```
 
-With these parameters:  
-- **`completion`**: Returns an `EIQInboxCount` model or error information when the operation completes.  
+## Migrating to 3.x
 
-The `EIQInboxCount` model includes:  
-- **`totalCount`**: Total number of inbox items.  
-- **`unreadCount`**: Number of unread inbox items.  
-- **`readCount`**: Number of read inbox items.  
-- **`deletedCount`**: Number of deleted inbox items.  
+- Minimum deployment target is now **iOS 15.0**.
+- The SDK no longer brings Alamofire into your project. If your app uses Alamofire directly, add it as your own dependency.
+- Import the module as `import EIQNotifica` (previously `EnliqNotifica`).
+- `EIQNotificaNotificationService` and `EIQNotificaNotificationContent` are now available as separate libraries.
 
-#### 3.2 Delete All Inbox Items
+## Support
 
-Deletes all inbox items for the user. Once executed, all messages in the inbox (read, unread, and deleted) will be permanently removed.
+- **Integration guides & changelog:** [developer.enliq.com](https://developer.enliq.com)
+- **Bug reports:** [GitHub Issues](https://github.com/loodos/enliq-notifica-ios-sdk/issues)
+- **Account & panel questions:** contact your Enliq account manager.
 
-```swift
-EIQNotificaManager.shared.deleteAll { result in
-    print("All inbox items deleted: \(success)")
-}
-```
+---
 
-With these parameters:  
-- **`completion`**: Returns a success flag (`Bool`) or error information when the operation completes.  
-
-## License
-
-EIQNotifica is licensed under the MIT License. See the [LICENSE](./LICENSE) file for details.
+<p align="center">© Enliq. All rights reserved.</p>
