@@ -315,6 +315,7 @@ EIQNotificaManager.shared.logLevel(logLevel: .debug) // .error, .warning, .notic
 - The SDK no longer brings Alamofire into your project. If your app uses Alamofire directly, add it as your own dependency.
 - Import the module as `import EIQNotifica` (previously `EnliqNotifica`).
 - `EIQNotificaNotificationService` and `EIQNotificaNotificationContent` are now available as separate libraries.
+- If you previously used the SDK from source, run **Product → Clean Build Folder** (or delete DerivedData) once after switching. Stale source-built `EIQNotifica*` modules otherwise cause `Undefined symbols` linker errors.
 
 ## Support
 
