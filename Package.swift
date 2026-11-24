@@ -1,6 +1,6 @@
 // swift-tools-version: 5.9
 //
-// EIQNotifica iOS SDK — v3.5.1
+// EIQNotifica iOS SDK — v3.5.2
 // Bu dosya otomatik üretilir; elle düzenlemeyin.
 
 import PackageDescription
@@ -18,18 +18,18 @@ let package = Package(
     targets: [
         .binaryTarget(
             name: "EIQNotifica",
-            url: "https://github.com/loodos/enliq-notifica-ios-sdk/releases/download/v3.5.1/EIQNotifica.xcframework.zip",
-            checksum: "f76c0365b0783dab6be6b1023a1b9e5eea92f2045f9ace9c25768ebd17e422a6"
+            url: "https://github.com/loodos/enliq-notifica-ios-sdk/releases/download/v3.5.2/EIQNotifica.xcframework.zip",
+            checksum: "3613f32741d94da00e338cfacbb75fea9d6c1ab5fcaaea274d9356c44d89ceae"
         ),
         .binaryTarget(
             name: "EIQNotificaNotificationService",
-            url: "https://github.com/loodos/enliq-notifica-ios-sdk/releases/download/v3.5.1/EIQNotificaNotificationService.xcframework.zip",
-            checksum: "e158cb51f3cac5544db7dea14640b9919712ad53dc3380e61525ccb1e9f07d3a"
+            url: "https://github.com/loodos/enliq-notifica-ios-sdk/releases/download/v3.5.2/EIQNotificaNotificationService.xcframework.zip",
+            checksum: "42fa974d378a34e83c1272c1860a1b56729477a0ab13585726f4d9d8da9023d2"
         ),
         .binaryTarget(
             name: "EIQNotificaNotificationContent",
-            url: "https://github.com/loodos/enliq-notifica-ios-sdk/releases/download/v3.5.1/EIQNotificaNotificationContent.xcframework.zip",
-            checksum: "2c081aaf6878e9aae3fe323e90b6379ab7e95fd5d53e340499af43e9cde058b8"
+            url: "https://github.com/loodos/enliq-notifica-ios-sdk/releases/download/v3.5.2/EIQNotificaNotificationContent.xcframework.zip",
+            checksum: "b82dbcac4e668d0f57b71f5faa8045722957f61ab8bd57dbf84e1dc4ae212b2e"
         ),
     ]
 )
